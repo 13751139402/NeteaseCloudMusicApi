@@ -1,13 +1,13 @@
-const encrypt = require('./crypto')
-const request = require('request')
-const queryString = require('querystring')
+const encrypt = require('./crypto') // 加密
+const request = require('request')  // 请求模块
+const queryString = require('querystring') // 模块提供用于解析和格式化 URL 查询字符串的实用工具。
 const PacProxyAgent = require('pac-proxy-agent')
-const zlib = require('zlib')
+const zlib = require('zlib') // 压缩
 
 // request.debug = true // 开启可看到更详细信息
 
 const chooseUserAgent = ua => {
-  const userAgentList = [
+  const userAgentList = [ //用户代理人列表
     'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1',
     'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1',
     'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Mobile Safari/537.36',
@@ -24,24 +24,32 @@ const chooseUserAgent = ua => {
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/13.10586'
   ]
   let index = 0
-  if (typeof ua == 'undefined')
+  if (typeof ua == 'undefined') { // 随机选取用户代理人
     index = Math.floor(Math.random() * userAgentList.length)
-  else if (ua === 'mobile') index = Math.floor(Math.random() * 7)
-  else if (ua === 'pc') index = Math.floor(Math.random() * 5) + 8
-  else return ua
+  }
+  else if (ua === 'mobile') { // 随机取前7位 手机端 
+    index = Math.floor(Math.random() * 7)
+  }
+  else if (ua === 'pc') { // 随机取7位之后 电脑端
+    index = Math.floor(Math.random() * 5) + 8
+  }
+  else { // 没有此代理，返回ua
+    return ua
+  }
   return userAgentList[index]
 }
 
 const createRequest = (method, url, data, options) => {
   return new Promise((resolve, reject) => {
     let headers = { 'User-Agent': chooseUserAgent(options.ua) }
-    if (method.toUpperCase() === 'POST')
+    if (method.toUpperCase() === 'POST') {// toUpperCase：转化为大写
       headers['Content-Type'] = 'application/x-www-form-urlencoded'
-    if (url.includes('music.163.com'))
+    }
+    if (url.includes('music.163.com')) {
       headers['Referer'] = 'https://music.163.com'
-    // headers['X-Real-IP'] = '118.88.88.88'
-
-    if (typeof options.cookie === 'object')
+      // headers['X-Real-IP'] = '118.88.88.88'
+    }
+    if (typeof options.cookie === 'object') // cookie 由object转化为string
       headers['Cookie'] = Object.keys(options.cookie)
         .map(
           key =>
@@ -50,14 +58,15 @@ const createRequest = (method, url, data, options) => {
             encodeURIComponent(options.cookie[key])
         )
         .join('; ')
-    else if (options.cookie) headers['Cookie'] = options.cookie
-
-    if (options.crypto === 'weapi') {
-      let csrfToken = (headers['Cookie'] || '').match(/_csrf=([^(;|$)]+)/)
-      data.csrf_token = csrfToken ? csrfToken[1] : ''
-      data = encrypt.weapi(data)
-      url = url.replace(/\w*api/, 'weapi')
-    } else if (options.crypto === 'linuxapi') {
+    else if (options.cookie) {
+      headers['Cookie'] = options.cookie
+    }
+    if (options.crypto === 'weapi') { // 电脑端
+      let csrfToken = (headers['Cookie'] || '').match(/_csrf=([^(;|$)]+)/) // 如果有cookie,则cookie中保存着csrf中的token,取出token
+      data.csrf_token = csrfToken ? csrfToken[1] : '' // 取出token放到response中的data中
+      data = encrypt.weapi(data) // 将data进行加密，通过公钥将数据进行加密，再在服务器中解密
+      url = url.replace(/\w*api/, 'weapi') // 替换为weapi
+    } else if (options.crypto === 'linuxapi') { // linux加密
       data = encrypt.linuxapi({
         method: method,
         url: url.replace(/\w*api/, 'api'),
@@ -66,7 +75,7 @@ const createRequest = (method, url, data, options) => {
       headers['User-Agent'] =
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
       url = 'https://music.163.com/api/linux/forward'
-    } else if (options.crypto === 'eapi') {
+    } else if (options.crypto === 'eapi') { // 手机端
       const cookie = options.cookie || {};
       const csrfToken = cookie['__csrf'] || ''
       const header = {
@@ -130,10 +139,10 @@ const createRequest = (method, url, data, options) => {
               zlib.unzip(body, function (err, buffer) {
                 const _buffer = err ? body : buffer
                 try {
-                  try{
+                  try {
                     answer.body = JSON.parse(encrypt.decrypt(_buffer).toString())
                     answer.status = answer.body.code || res.statusCode
-                  } catch(e){
+                  } catch (e) {
                     answer.body = JSON.parse(_buffer.toString())
                     answer.status = res.statusCode
                   }
@@ -152,7 +161,7 @@ const createRequest = (method, url, data, options) => {
 
               answer.body = JSON.parse(body)
               answer.status = answer.body.code || res.statusCode
-              if(answer.body.code === 502){
+              if (answer.body.code === 502) {
                 answer.status = 200
               }
             }

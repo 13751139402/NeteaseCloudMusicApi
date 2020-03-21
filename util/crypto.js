@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2019-12-19 10:32:22
+ * @LastEditTime: 2019-12-19 18:30:16
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: \NeteaseCloudMusicApi\util\crypto.js
+ */
 const crypto = require('crypto')
 const iv = Buffer.from('0102030405060708')
 const presetKey = Buffer.from('0CoJUm6Qyw8W8jud')

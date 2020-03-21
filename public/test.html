@@ -1,3 +1,11 @@
+<!--
+ * @Author: your name
+ * @Date: 2019-12-19 10:32:22
+ * @LastEditTime : 2019-12-19 16:24:58
+ * @LastEditors  : Please set LastEditors
+ * @Description: In User Settings Edit
+ * @FilePath: \NeteaseCloudMusicApi\public\test.html
+ -->
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -12,35 +20,35 @@
         <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
         <script src="https://cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
         <script>
-            const phone = ''
-            const password = ''
+            const phone = '13751139402'
+            const password = 'dxw1437491371'
             const port = 3000
             if(!phone || !password){
               const msg = '请设置你的手机号码和密码'
               alert(msg)
               throw new Error(msg)
             }
-            $.ajax({
-              url: `http://localhost:${port}/login/cellphone?phone=${phone}&password=${password}`,
-              success: function(data) {
-                console.log(data)
-                $.ajax({
-                  url: `http://localhost:${port}/recommend/resource `,
-                  xhrFields: {
-                    withCredentials: true //关键
-                  },
-                  success: function(data) {
-                    console.log(data)
-                  },
-                  error: function(err) {
-                    console.log(err)
-                  }
-                })
-              },
-              error: function(err) {
-                console.log(err)
-              }
-            })
+            // $.ajax({
+            //   url: `http://localhost:${port}/login/cellphone?phone=${phone}&password=${password}`,
+            //   success: function(data) {
+            //     console.log(data)
+            //     $.ajax({
+            //       url: `http://localhost:${port}/recommend/resource `,
+            //       xhrFields: {
+            //         withCredentials: true //关键
+            //       },
+            //       success: function(data) {
+            //         console.log(data)
+            //       },
+            //       error: function(err) {
+            //         console.log(err)
+            //       }
+            //     })
+            //   },
+            //   error: function(err) {
+            //     console.log(err)
+            //   }
+            // })
 
             axios({
               url: `http://localhost:${port}/login/cellphone?phone=${phone}&password=${password}`
